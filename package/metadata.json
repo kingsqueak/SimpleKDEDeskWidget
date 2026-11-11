@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "2788495+kingsqueak@users.noreply.github.com",
+                "Name": "KC2RGW Chris"
+            }
+        ],
+        "Category": "Date and Time",
+        "Description": "Big clock, three-day forecast, weather alerts, nearby lightning and today's calendar",
+        "Icon": "weather-few-clouds",
+        "Id": "com.kingsqueak.simplekdedeskwidget",
+        "License": "GPL-3.0-or-later",
+        "Name": "SimpleKDEDeskWidget",
+        "Version": "0.1.0",
+        "Website": "https://github.com/kingsqueak/SimpleKDEDeskWidget"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
