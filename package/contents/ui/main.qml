@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 KC2RGW Chris
 
 import QtQuick
-import QtWebSockets
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasma5support as P5Support
@@ -150,19 +149,22 @@ PlasmoidItem {
     property int retryDelay: 5
     readonly property bool lightningWanted: cfg.showLightning && hasLocation
 
-    WebSocket {
-        id: ws
-        active: false
-        onStatusChanged: function () {
-            if (ws.status === WebSocket.Open) {
-                sendTextMessage('{"a":111}')
+    Loader { id: wsLoader; source: "LightningSocket.qml" }
+    readonly property var ws: wsLoader.item
+    readonly property bool lightningUnavailable: wsLoader.status === Loader.Error
+
+    Connections {
+        target: wsLoader.item
+        function onStatusChanged() {
+            if (root.ws.isOpen) {
+                root.ws.sendTextMessage('{"a":111}')
                 root.lightningStatus = "Live"
                 root.lastMessage = Date.now()
-            } else if (ws.status === WebSocket.Error || ws.status === WebSocket.Closed) {
+            } else if (root.ws.failed) {
                 if (root.lightningWanted) root.reconnect()
             }
         }
-        onTextMessageReceived: function (message) {
+        function onTextMessageReceived(message) {
             root.lastMessage = Date.now()
             root.retryDelay = 5
             var s = Logic.parseStrike(message, root.cfg.latitude, root.cfg.longitude, root.cfg.lightningRadiusKm)
@@ -176,7 +178,7 @@ PlasmoidItem {
     Timer { id: retryTimer; repeat: false; onTriggered: root.connectLightning() }
 
     function connectLightning() {
-        if (!lightningWanted) return
+        if (!lightningWanted || !ws) return
         ws.active = false
         ws.url = "wss://" + hosts[hostIndex % hosts.length] + "/"
         lightningStatus = "Connecting to " + hosts[hostIndex % hosts.length]
@@ -185,6 +187,7 @@ PlasmoidItem {
     }
 
     function reconnect() {
+        if (!ws) return
         ws.active = false
         if (retryTimer.running) return
         hostIndex++
@@ -198,6 +201,7 @@ PlasmoidItem {
         strikes = []
         recomputeLightning()
         retryTimer.stop()
+        if (!ws) { lightningStatus = "Needs qml6-module-qtwebsockets"; return }
         if (lightningWanted) connectLightning()
         else { ws.active = false; lightningStatus = "Off" }
     }
@@ -220,7 +224,7 @@ PlasmoidItem {
         interval: 20000; running: true; repeat: true
         onTriggered: {
             root.recomputeLightning()
-            if (root.lightningWanted && ws.status === WebSocket.Open && Date.now() - root.lastMessage > 90000)
+            if (root.lightningWanted && root.ws && root.ws.isOpen && Date.now() - root.lastMessage > 90000)
                 root.reconnect()
         }
     }

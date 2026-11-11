@@ -14,7 +14,7 @@ Item {
     id: card
 
     property var model
-    readonly property var cfg: Plasmoid.configuration
+    property var cfg: Plasmoid.configuration      // the screenshot harness passes its own
 
     // Base design is 380 px wide plus a margin for the drop shadow.
     readonly property real baseWidth: 380
@@ -207,6 +207,14 @@ Item {
         LightningLine {
             visible: card.cfg.showLightning && card.model.lightning !== null
             Layout.fillWidth: true
+        }
+
+        T {
+            visible: card.cfg.showLightning && card.model.lightningUnavailable === true
+            size: 11; color: "#ffcc00"
+            wrapMode: Text.WordWrap; maximumLineCount: 2
+            Layout.fillWidth: true
+            text: "⚠ Lightning needs the qml6-module-qtwebsockets package"
         }
     }
 
