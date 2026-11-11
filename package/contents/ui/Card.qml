@@ -56,7 +56,7 @@ Item {
             blurMax: 48
             shadowBlur: Math.min(1, card.cfg.shadowStrength)
             shadowOpacity: Math.min(1, 0.9 * card.cfg.shadowStrength + 0.25)
-            shadowVerticalOffset: 14 * card.cfg.shadowStrength * card.sc
+            shadowVerticalOffset: 7 * card.cfg.shadowStrength * card.sc
             autoPaddingEnabled: true
         }
 
